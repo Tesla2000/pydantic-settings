@@ -239,7 +239,36 @@ class BaseSettings(BaseModel):
         Returns:
             A tuple containing the sources and their order for loading the settings values.
         """
-        return init_settings, env_settings, dotenv_settings, file_secret_settings
+        assert isinstance(env_settings, EnvSettingsSource)
+        assert isinstance(dotenv_settings, DotEnvSettingsSource)
+        return (
+            init_settings,
+            env_settings,
+            type(env_settings)(
+                settings_cls=env_settings.settings_cls,
+                case_sensitive=env_settings.case_sensitive,
+                env_prefix="",
+                env_nested_delimiter=env_settings.env_nested_delimiter,
+                env_nested_max_split=env_settings.env_nested_max_split,
+                env_ignore_empty=env_settings.env_ignore_empty,
+                env_parse_none_str=env_settings.env_parse_none_str,
+                env_parse_enums=env_settings.env_parse_enums,
+            ),
+            dotenv_settings,
+            type(dotenv_settings)(
+                settings_cls=dotenv_settings.settings_cls,
+                env_file=dotenv_settings.env_file,
+                env_file_encoding=dotenv_settings.env_file_encoding,
+                case_sensitive=dotenv_settings.case_sensitive,
+                env_prefix="",
+                env_nested_delimiter=dotenv_settings.env_nested_delimiter,
+                env_nested_max_split=dotenv_settings.env_nested_max_split,
+                env_ignore_empty=dotenv_settings.env_ignore_empty,
+                env_parse_none_str=dotenv_settings.env_parse_none_str,
+                env_parse_enums=dotenv_settings.env_parse_enums,
+            ),
+            file_secret_settings,
+        )
 
     def _settings_build_values(
         self,
